@@ -10,6 +10,8 @@ int file_close(FILE* file);
 long long how_much_symbols_in_file(FILE* file);
 int sequal(const char *s1,const char *s2);
 void write_to_massive(char *A,const long long N,FILE* file);
+char to_lower(char A);
+void to_litle_registr(char *A);
 
 
 int main(int argc, char *argv[])
@@ -62,13 +64,30 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+//приведение к нижнему регистру
+char to_lower(char A){
+    if((A >= 'A') && (A <= 'Z'))
+        return A + ('a' - 'A');
+    return A;
+}
+//приведение к нижнему регистру
+void to_litle_registr(char *A){
+
+    int i = 0;
+        while (A[i]!='\0')
+        {
+            A[i] = to_lower (A[i]);
+            i++;
+        }
+
+}
+
 void write_to_massive(char *A,const long long N,FILE* file){
 
 
     for (long long i = 0; i < N; i++){
             fscanf(file,"%c",&A[i]); /* Записываем символы из файла в массив */
             printf("%c", A[i]);
-            printf("pizdec\n");
         }
 }
 
