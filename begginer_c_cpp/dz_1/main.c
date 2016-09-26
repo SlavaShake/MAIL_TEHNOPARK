@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>//для isspace и ispunct
 
 
 
@@ -12,6 +13,7 @@ int sequal(const char *s1,const char *s2);
 void write_to_massive(char *A,const long long N,FILE* file);
 char to_lower(char A);
 void to_litle_registr(char *A);
+long long how_much_words_in_file(const char *A,const long long N);
 
 
 int main(int argc, char *argv[])
@@ -53,6 +55,9 @@ int main(int argc, char *argv[])
         //записываем все из файла в массив
         write_to_massive(A,N,read_file);
 
+        //сколько всего слов было в фале
+        how_much_words_in_file(A,N);
+
 
         file_close(read_file);
         }
@@ -64,12 +69,28 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+/* Подсчитываем количество слов в тексте */
+long long how_much_words_in_file(const char *A,const long long N){
+
+    long long i;
+    long long k = 0;
+    for (i = 0; i < N; i++){
+        if ((ispunct(A[i]) && isspace(A[i+1])) || isspace(A[i]) || ispunct(A[i]))
+            k++;
+    }
+    printf("Kolichestvo slov v texste: %lli \n", k + 1);
+
+    return k+1;
+
+}
+
 //приведение к нижнему регистру
 char to_lower(char A){
     if((A >= 'A') && (A <= 'Z'))
         return A + ('a' - 'A');
     return A;
 }
+
 //приведение к нижнему регистру
 void to_litle_registr(char *A){
 
