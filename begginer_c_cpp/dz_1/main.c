@@ -50,7 +50,8 @@ int main(int argc, char *argv[])
         N = how_much_symbols_in_file(read_file);
 
         //выделяем память под фаил
-        A = malloc (sizeof (char) * (N + 1));
+        A = (char *)malloc (N + 1);
+        if (A == NULL) exit (1);
 
         //записываем все из файла в массив
         write_to_massive(A,N,read_file);
@@ -78,7 +79,7 @@ long long how_much_words_in_file(const char *A,const long long N){
         if ((ispunct(A[i]) && isspace(A[i+1])) || isspace(A[i]) || ispunct(A[i]))
             k++;
     }
-    printf("Kolichestvo slov v texste: %lli \n", k + 1);
+    printf("\nKolichestvo slov v texste: %lli \n", k + 1);
 
     return k+1;
 
@@ -103,11 +104,12 @@ void to_litle_registr(char *A){
 
 }
 
+/* Записываем символы из файла в массив */
 void write_to_massive(char *A,const long long N,FILE* file){
 
 
     for (long long i = 0; i < N; i++){
-            fscanf(file,"%c",&A[i]); /* Записываем символы из файла в массив */
+            fscanf(file,"%c",&A[i]);
             printf("%c", A[i]);
         }
 }
