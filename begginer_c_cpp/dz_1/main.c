@@ -33,9 +33,9 @@ char to_lower(char A);
 void char_to_lowercase(char A[]);
 long long how_much_words_in_file(const char *A,const long long N);
 void squeeze(char s1[]);
-void add_word_to_struct(char **words,const char *A,const long long N);
+void add_word_to_struct(char words[MAX_WORDS][100],const char A[],const long long N);
 void delete_arr(char *c);
-int check_word_in_struct(char **struct_word,char *word);
+int check_word_in_struct(const char struct_word[MAX_WORDS][100],const char word[]);
 
 
 
@@ -50,8 +50,14 @@ struct find_words {
     //колличество всех слов в отдельном файле
     long long   number_of_words_in_file[MAX_FILE];
 
+    //в скольких файлах он есть
+    int         N_file[MAX_WORDS];
+
     //частота попаданий слова в отдельном файле
     double      TFi[MAX_WORDS][MAX_FILE];
+
+    //логарифм по файлам
+    double      iDF[MAX_WORDS][MAX_FILE];
 };
 
 
@@ -66,14 +72,14 @@ int main(int argc, char *argv[])
     printf("File to write words: %s\n",file_input);
 
     //счетчик файлов коллекции
-    int i = 2;
+    int i = 1;
     //инициализация структуры
     struct find_words check_words;
 
     while(argv[i] != '\0'){
 
 
-        //берем файл из коллекции
+        //берем файл
         const char *file_collection = argv[i++];
         printf("File collection is %s\n",file_collection);
 
@@ -107,8 +113,8 @@ int main(int argc, char *argv[])
 
 
         //сколько всего слов было в фале
-        check_words.number_of_words_in_file[i-2] = how_much_words_in_file(A,N);
-        printf("number_of_words_in_file = %lli\n",check_words.number_of_words_in_file[i-2]);
+        check_words.number_of_words_in_file[i-1] = how_much_words_in_file(A,N);
+        printf("number_of_words_in_file = %lli\n",check_words.number_of_words_in_file[i-1]);
 
         //заполняем структуру
         add_word_to_struct(check_words.word,A,N);
@@ -127,15 +133,15 @@ int main(int argc, char *argv[])
 
 
 //заполняем массив в структуре не повторяющимися словами
-void add_word_to_struct(char **words,const char *A,const long long N){
+void add_word_to_struct(char words[MAX_WORDS][100],const char A[],const long long N){
     int j = 0;
     char word[100];
-    for(int i = 0; (i < N) || (A[i] != '\0');i++){
+    for(long long i = 0; (i < N) || (A[i] != '\0');i++){
         if (A[i] == ' ' ){
+            printf("A[%lli] = %s\n",i,word);
             if(check_word_in_struct(words,word) == 1)
-            words[i] = word;
+            strcpy(words[i],word);
             delete_arr(word);
-            i++;
         }
         else{
             word[j] = A[i];
@@ -146,7 +152,7 @@ void add_word_to_struct(char **words,const char *A,const long long N){
 }
 
 //проверяем на наличие слова в матрице
-int check_word_in_struct(char **struct_word,char *word){
+int check_word_in_struct(const char struct_word[MAX_WORDS][100],const char word[]){
 
     for(int i = 0; (i < MAX_WORDS) || (struct_word[i] != '\0');i++){
         if(strcmp(struct_word[i],word) == 0){
@@ -174,9 +180,9 @@ long long how_much_words_in_file(const char *A,const long long N){
         if (isspace(A[i]) && !isspace(A[i+1]))
             k++;
     }
-    printf("Kolichestvo slov v texste: %lli \n", k - 2);
+    printf("Kolichestvo slov v texste: %lli \n", k);
 
-    return k - 2;
+    return k;
 
 }
 
@@ -212,6 +218,8 @@ void squeeze(char s1[]){
      s1[k] = '\0';
 
      for(i = k = 0;s1[k] != '\0';i++){
+         if(i==0 && isspace(s1[i]))
+             continue;
          if(isspace(s1[i]) && isspace(s1[i+1]))
              continue;
          else
