@@ -33,32 +33,11 @@ char to_lower(char A);
 void char_to_lowercase(char A[]);
 long long how_much_words_in_file(const char *A,const long long N);
 void squeeze(char s1[]);
-void add_word_to_struct(char words[MAX_WORDS][100],const char A[],const long long N);
+void add_word_to_array_of_word(char words[MAX_WORDS][100],const char A[],const long long N);
 void delete_arr(char *c);
-int check_word_in_struct(const char struct_word[MAX_WORDS][100],const char word[]);
+int check_word_in_matrix(const char struct_word[MAX_WORDS][100],const char word[]);
 
 
-
-struct find_words {
-    //может содержать до 2000 слов для максимального
-    //колличества файлов в коллекции равным 15
-    char        word[MAX_WORDS][100];
-
-    //колличество пападаний слова в файле
-    long long   number_of_words[MAX_WORDS][MAX_FILE];
-
-    //колличество всех слов в отдельном файле
-    long long   number_of_words_in_file[MAX_FILE];
-
-    //в скольких файлах он есть
-    int         N_file[MAX_WORDS];
-
-    //частота попаданий слова в отдельном файле
-    double      TFi[MAX_WORDS][MAX_FILE];
-
-    //логарифм по файлам
-    double      iDF[MAX_WORDS][MAX_FILE];
-};
 
 
 int main(int argc, char *argv[])
@@ -73,8 +52,19 @@ int main(int argc, char *argv[])
 
     //счетчик файлов коллекции
     int i = 1;
-    //инициализация структуры
-    struct find_words check_words;
+
+    //может содержать до 2000 слов для максимального
+    //колличества файлов в коллекции равным 15
+    char        word[MAX_WORDS][100];
+
+    //колличество пападаний слова в файле
+    long long   number_of_words[MAX_WORDS][MAX_FILE];
+
+    //колличество всех слов в отдельном файле
+    long long   number_of_words_in_file[MAX_FILE];
+
+    //частота попаданий слова в отдельном файле
+    double      TFi[MAX_WORDS][MAX_FILE];
 
     while(argv[i] != '\0'){
 
@@ -113,11 +103,11 @@ int main(int argc, char *argv[])
 
 
         //сколько всего слов было в фале
-        check_words.number_of_words_in_file[i-1] = how_much_words_in_file(A,N);
-        printf("number_of_words_in_file = %lli\n",check_words.number_of_words_in_file[i-1]);
+        number_of_words_in_file[i-1] = how_much_words_in_file(A,N);
+        printf("number_of_words_in_file = %lli\n",number_of_words_in_file[i-1]);
 
-        //заполняем структуру
-        add_word_to_struct(check_words.word,A,N);
+        //заполняем массив
+        add_word_to_array_of_word(word,A,N);
 
 
 
@@ -132,14 +122,14 @@ int main(int argc, char *argv[])
 }
 
 
-//заполняем массив в структуре не повторяющимися словами
-void add_word_to_struct(char words[MAX_WORDS][100],const char A[],const long long N){
+//заполняем массив не повторяющимися словами
+void add_word_to_array_of_word(char words[MAX_WORDS][100],const char A[],const long long N){
     int j = 0;
     char word[100];
     for(long long i = 0; (i < N) || (A[i] != '\0');i++){
         if (A[i] == ' ' ){
             printf("A[%lli] = %s\n",i,word);
-            if(check_word_in_struct(words,word) == 1)
+            if(check_word_in_matrix(words,word) == 1)
             strcpy(words[i],word);
             delete_arr(word);
         }
@@ -152,7 +142,7 @@ void add_word_to_struct(char words[MAX_WORDS][100],const char A[],const long lon
 }
 
 //проверяем на наличие слова в матрице
-int check_word_in_struct(const char struct_word[MAX_WORDS][100],const char word[]){
+int check_word_in_matrix(const char struct_word[MAX_WORDS][100],const char word[]){
 
     for(int i = 0; (i < MAX_WORDS) || (struct_word[i] != '\0');i++){
         if(strcmp(struct_word[i],word) == 0){
