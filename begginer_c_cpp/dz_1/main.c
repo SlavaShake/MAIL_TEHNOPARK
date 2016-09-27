@@ -17,8 +17,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>//для isspace и ispunct
+#include <math.h>
 
 
+#define MAX_WORDS 2000
+#define MAX_FILE 15
 
 FILE* open_file(const char *name_file);
 FILE* write_in_file(const char *name_file);
@@ -30,6 +33,23 @@ char to_lower(char A);
 void char_to_lowercase(char A[]);
 long long how_much_words_in_file(const char *A,const long long N);
 void squeeze (char s1[],const char s2[]);
+
+
+
+struct find_words {
+    //может содержать до 2000 слов для максимального
+    //колличества файлов в коллекции равным 15
+    char        word[MAX_WORDS][100];
+
+    //колличество пападаний слова в файле
+    long long   number_of_words[MAX_WORDS][MAX_FILE];
+
+    //колличество всех слов в отдельном файле
+    long long   number_of_words_in_file[MAX_FILE];
+
+    //частота попаданий слова в отдельном файле
+    double      TFi[MAX_WORDS][MAX_FILE];
+};
 
 
 int main(int argc, char *argv[])
@@ -82,8 +102,6 @@ int main(int argc, char *argv[])
         char_to_lowercase(A);
         printf("%s\n", A);
 
-
-
         //сколько всего слов было в фале
         how_much_words_in_file(A,N);
 
@@ -105,7 +123,7 @@ long long how_much_words_in_file(const char *A,const long long N){
 
     long long i;
     long long k = 0;
-    for (i = 0; i < N; i++){
+    for (i = 0; (i < N) || (A[i] != '\0'); i++){
         if (isspace(A[i]) && (isspace(A[i-1]) == 0))
             k++;
     }
