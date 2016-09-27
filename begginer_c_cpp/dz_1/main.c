@@ -33,7 +33,7 @@ char to_lower(char A);
 void char_to_lowercase(char A[]);
 long long how_much_words_in_file(const char *A,const long long N);
 void squeeze(char s1[]);
-void add_word_to_struct(char **word,const char *A);
+void add_word_to_struct(char **words,const char *A,const long long N);
 void delete_arr(char *c);
 int check_word_in_struct(char **struct_word,char *word);
 
@@ -110,6 +110,8 @@ int main(int argc, char *argv[])
         check_words.number_of_words_in_file[i-2] = how_much_words_in_file(A,N);
         printf("number_of_words_in_file = %lli\n",check_words.number_of_words_in_file[i-2]);
 
+        //заполняем структуру
+        add_word_to_struct(check_words.word,A,N);
 
 
 
@@ -125,18 +127,19 @@ int main(int argc, char *argv[])
 
 
 //заполняем массив в структуре не повторяющимися словами
-void add_word_to_struct(char **words,const char *A){
-    int i = 0, j = 0;
+void add_word_to_struct(char **words,const char *A,const long long N){
+    int j = 0;
     char word[100];
-    while(*A != '\0'){
-        if (*A == ' ' ){
-            if(check_word_in_struct(words,word))
+    for(int i = 0; (i < N) || (A[i] != '\0');i++){
+        if (A[i] == ' ' ){
+            if(check_word_in_struct(words,word) == 1)
             words[i] = word;
             delete_arr(word);
             i++;
         }
         else{
-
+            word[j] = A[i];
+            j++;
         }
     }
 
@@ -145,12 +148,11 @@ void add_word_to_struct(char **words,const char *A){
 //проверяем на наличие слова в матрице
 int check_word_in_struct(char **struct_word,char *word){
 
-    for(int i = 0; (i < MAX_WORDS) && (struct_word[i] != '\0');i++){
+    for(int i = 0; (i < MAX_WORDS) || (struct_word[i] != '\0');i++){
         if(strcmp(struct_word[i],word) == 0){
             return 0;
         }
     }
-
     return 1;
 }
 
@@ -172,9 +174,9 @@ long long how_much_words_in_file(const char *A,const long long N){
         if (isspace(A[i]) && !isspace(A[i+1]))
             k++;
     }
-    printf("Kolichestvo slov v texste: %lli \n", k);
+    printf("Kolichestvo slov v texste: %lli \n", k - 2);
 
-    return k;
+    return k - 2;
 
 }
 
