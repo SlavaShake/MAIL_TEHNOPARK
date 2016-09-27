@@ -24,7 +24,7 @@
 #define MAX_FILE 15
 
 FILE* open_file(const char *name_file);
-FILE* write_in_file(const char *name_file);
+FILE* write_to_file(const char *name_file);
 int close_file(FILE* file);
 long long how_much_symbols_in_file(FILE* file);
 int sequal(const char *s1,const char *s2);
@@ -32,7 +32,10 @@ void write_to_array(char *A,const long long N,FILE* file);
 char to_lower(char A);
 void char_to_lowercase(char A[]);
 long long how_much_words_in_file(const char *A,const long long N);
-void squeeze (char s1[],const char s2[]);
+void squeeze(char s1[]);
+void add_word_to_struct(char **word,const char *A);
+void delete_arr(char *c);
+int check_word_in_struct(char **struct_word,char *word);
 
 
 
@@ -53,12 +56,7 @@ struct find_words {
 
 
 int main(int argc, char *argv[])
-{
-    //символы на удаление из массива
-    char sym[260] = { '.', ',', ':', ';', '!', '^', '?', '#', '$', '%',
-        '*', '|', '/', '\\', '~', '`', '"', '<', '>', '_', '-', '+', '=', '(', ')',
-        '{', '}', '[', ']', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '\n','\t','\v','\f','\r'};
-
+{    
     if (argc < 3){
         printf("Usage: %s file_in file_1 and i.e.\n", argv[0]);
         return EXIT_FAILURE;
@@ -69,6 +67,8 @@ int main(int argc, char *argv[])
 
     //счетчик файлов коллекции
     int i = 2;
+    //инициализация структуры
+    struct find_words check_words;
 
     while(argv[i] != '\0'){
 
@@ -79,6 +79,7 @@ int main(int argc, char *argv[])
 
         //открываем его
         FILE* read_file = open_file(file_collection);
+        if(read_file == NULL) return 0;
 
         //считаем сколько в нем символов
         long long N = how_much_symbols_in_file(read_file);
@@ -92,21 +93,27 @@ int main(int argc, char *argv[])
 
         //записываем все из файла в массив
         write_to_array(A,N,read_file);
-        printf("%s\n", A);
+        printf("write_to_array: %s\n\n", A);
 
-        //Удаляет из строки s1 все символы встречающиеся в строке s2
-        squeeze(A, sym);
-        printf("%s\n", A);
+        close_file(read_file);
+
+        //Удаляет из строки s1 символы и повторяющиеся пробелы
+        squeeze(A);
+        printf("squeeze: %s\n\n", A);
 
         //приводим к нижнему регистру
         char_to_lowercase(A);
-        printf("%s\n", A);
+        printf("char_to_lowercase: %s\n", A);
+
 
         //сколько всего слов было в фале
-        how_much_words_in_file(A,N);
+        check_words.number_of_words_in_file[i-2] = how_much_words_in_file(A,N);
+        printf("number_of_words_in_file = %lli\n",check_words.number_of_words_in_file[i-2]);
 
 
-        close_file(read_file);
+
+
+
         }
 
 
@@ -117,6 +124,44 @@ int main(int argc, char *argv[])
 }
 
 
+//заполняем массив в структуре не повторяющимися словами
+void add_word_to_struct(char **words,const char *A){
+    int i = 0, j = 0;
+    char word[100];
+    while(*A != '\0'){
+        if (*A == ' ' ){
+            if(check_word_in_struct(words,word))
+            words[i] = word;
+            delete_arr(word);
+            i++;
+        }
+        else{
+
+        }
+    }
+
+}
+
+//проверяем на наличие слова в матрице
+int check_word_in_struct(char **struct_word,char *word){
+
+    for(int i = 0; (i < MAX_WORDS) && (struct_word[i] != '\0');i++){
+        if(strcmp(struct_word[i],word) == 0){
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+//очистка промежуточного массива
+void delete_arr(char *c){
+    int i = 0;
+    while(c[i] != '\0')
+    {
+        c[i++] = '\0';
+    }
+}
 
 /* Подсчитываем количество слов в тексте */
 long long how_much_words_in_file(const char *A,const long long N){
@@ -124,12 +169,12 @@ long long how_much_words_in_file(const char *A,const long long N){
     long long i;
     long long k = 0;
     for (i = 0; (i < N) || (A[i] != '\0'); i++){
-        if (isspace(A[i]) && (isspace(A[i-1]) == 0))
+        if (isspace(A[i]) && !isspace(A[i+1]))
             k++;
     }
-    printf("Kolichestvo slov v texste: %lli \n", k - 1);
+    printf("Kolichestvo slov v texste: %lli \n", k);
 
-    return k-1;
+    return k;
 
 }
 
@@ -146,22 +191,31 @@ void char_to_lowercase(char A[]){
     int i = 0;
         while (A[i]!='\0')
         {
-            A[i] = to_lower (A[i]);
+            A[i] = to_lower(A[i]);
             i++;
         }
 
 }
 
-//Удаляет из строки s1 все символы встречающиеся в строке s2
-void squeeze(char s1[],const char s2[]){
-
-     int i, j, k;
-     for (i = k = 0; s1[i] != '\0'; i++) {
-         for (j = 0; s2[j] != '\0' && s2[j] != s1[i]; j++);
-         if (s2[j] == '\0')
+//Удаляет из строки s1 символы
+// и повторяющиеся пробелы
+void squeeze(char s1[]){
+     int i, k;
+     for (i = k = 0; s1[i] != '\0'; i++){
+         if(isspace(s1[i]) || ispunct(s1[i]) || ((48 <= s1[i]) && (s1[i] <= 57)))
+             s1[k++] = ' ';
+         else
              s1[k++] = s1[i];
      }
      s1[k] = '\0';
+
+     for(i = k = 0;s1[k] != '\0';i++){
+         if(isspace(s1[i]) && isspace(s1[i+1]))
+             continue;
+         else
+             s1[k++] = s1[i];
+         }
+     s1[k]='\0';
 }
 
 /* Записываем символы из файла в массив */
@@ -218,7 +272,7 @@ FILE* open_file(const char *name_file){
 
 }
 
-FILE* write_in_file(const char *name_file){
+FILE* write_to_file(const char *name_file){
     FILE* file = fopen(name_file,"wb");
     if(file == NULL){
         printf("Failed to open file: %s \n",name_file);
