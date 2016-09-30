@@ -28,7 +28,6 @@ FILE* write_to_file(const char *name_file);
 int close_file(FILE* file);
 char to_lower(char A);
 void char_to_lowercase(char A[]);
-void delete_arr(char c[]);
 int get_words_from_collection(FILE* open_file,char word[], long long N);
 int check_in_matrix( char words[MAX_WORDS][32], char word[], long long check_point[MAX_WORDS][MAX_FILE], int N_file);
 void calculate_TFi(long long N[MAX_FILE],long long check_point[MAX_WORDS][MAX_FILE],double TFi[MAX_WORDS][MAX_FILE],int argc,double res_TFi[MAX_WORDS],int num_word);
@@ -95,8 +94,6 @@ int main(int argc, char *argv[])
 
                 if(get_words_from_collection(file,word,N[i-1]) != 0)
                     check_in_matrix(words,word,number_of_words,i-1);
-
-                delete_arr(word);
             }
             close_file(file);
         }
@@ -161,20 +158,13 @@ int get_words_from_collection(FILE* open_file,char word[], long long N){
 
     word[i] = '\0';
 
-    if(word != '\0'){
+    if(word[0] != '\0'){
         N += 1;
         char_to_lowercase(word);
     }
     else
         return 0;
     return 1;
-}
-
-//очистка промежуточного массива
-void delete_arr(char c[]){
-    for(int i = 0; c[i] != '\0'; i++){
-        c[i++] = '\0';
-    }
 }
 
 //приведение к нижнему регистру
