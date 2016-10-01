@@ -97,6 +97,7 @@ int main(int argc, char *argv[])
             }
             close_file(file);
         }
+    i++;
     }
 
     num_word += 1;
