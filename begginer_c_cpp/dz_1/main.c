@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
                     if(check_in_matrix(words,word,number_of_words,i-1) == 0)
                         strcpy(words[num_word],word);
 
-                delete_arr(word);
+          
             }
             close_file(file);
         }
