@@ -1,4 +1,4 @@
-/*
+﻿/*
  *
 Написать программу, которая в качестве аргументов командной строки принимает имена текстовых
 файлов (первое - имя целевого документа, далее - имена остальных документов в коллекции), а
@@ -72,6 +72,8 @@ int main(int argc, char *argv[])
         if(i == 1){
 
             FILE* file = open_file(argv[i]);
+            if(file == NULL)
+                return 0;
 
             char word[32];
 
@@ -91,6 +93,8 @@ int main(int argc, char *argv[])
         }
         else{
             FILE* file = open_file(argv[i]);
+            if(file == NULL)
+                return 0;
 
             char word[32];
 
