@@ -28,10 +28,12 @@ FILE* write_to_file(const char *name_file);
 int close_file(FILE* file);
 char to_lower(char A);
 void char_to_lowercase(char A[]);
-int get_words_from_collection(FILE* open_file,char word[], long long N);
-int check_in_matrix( char words[MAX_WORDS][32], char word[], long long check_point[MAX_WORDS][MAX_FILE], int N_file);
-void calculate_TFi(long long N[MAX_FILE],long long check_point[MAX_WORDS][MAX_FILE],double TFi[MAX_WORDS][MAX_FILE],int argc,double res_TFi[MAX_WORDS],int num_word);
+void delete_arr(char c[]);
+int get_words_from_collection(FILE* open_file, char *word, long long *N);
+int check_in_matrix(char words[MAX_WORDS][32], char *word, long long check_point[MAX_WORDS][MAX_FILE], int N_file);
+void calculate_TFi(long long N[MAX_FILE],long long check_point[MAX_WORDS][MAX_FILE],double TFi[MAX_WORDS][MAX_FILE],int argc,double *res_TFi,int num_word);
 double summ(double TFi[MAX_FILE],int argc);
+void print_matrix(long long N[][MAX_FILE]);
 
 
 
@@ -45,8 +47,6 @@ int main(int argc, char *argv[])
     const char *file_input = argv[1];
     printf("File to write words: %s\n",file_input);
 
-    //счетчик файлов коллекции
-    int i = 1;
 
     //может содержать до 2000 слов для максимального
     //колличества файлов в коллекции равным 15
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     //счетчик слов которые есть в матрице
     int num_word = 0;
 
-    while(argv[i] != '\0'){
+    for(int i = 1; i < argc; i++){
 
         if(i == 1){
 
@@ -75,13 +75,17 @@ int main(int argc, char *argv[])
 
             char word[32];
 
-            for(num_word = 0; !feof(file); num_word++){
+            for(num_word = 0; !feof(file); ){
 
-                if(get_words_from_collection(file,word,N[i-1]) != 0)
-                    if(check_in_matrix(words,word,number_of_words,i-1) == 0)
+                if(get_words_from_collection(file,word,&N[i-1]) == 1){
+                    if(check_in_matrix(words,word,number_of_words,i-1) == 0){
                         strcpy(words[num_word],word);
+                        number_of_words[num_word][i-1]++;
+                        num_word++;
 
-          
+                    }
+                }
+
             }
             close_file(file);
         }
@@ -92,22 +96,26 @@ int main(int argc, char *argv[])
 
             for(int j = 0; !feof(file); j++){
 
-                if(get_words_from_collection(file,word,N[i-1]) != 0)
+                if(get_words_from_collection(file,word,&N[i-1]) == 1)
                     check_in_matrix(words,word,number_of_words,i-1);
+
             }
             close_file(file);
         }
-    i++;
     }
 
-    num_word += 1;
+    for(int i = 0;i<num_word;i++){
+        printf("words[%d] = %s\n",i,words[i]);
+    }
+
     FILE* write_file = write_to_file(file_input);
 
     calculate_TFi(N,number_of_words,TFi,argc,res_TFi,num_word);
 
     for(int i = 0; i < num_word; i++){
 
-        fprintf(write_file,"%15s = %15.9f",words[i],res_TFi[i]);
+//        fprintf(write_file,"RED%15s = BLUE%15.9f \n\n",words[i],res_TFi[i]);
+        printf("RED%15s = BLUE%15.9f \n\n",words[i],res_TFi[i]);
     }
     close_file(write_file);
     printf("Hello World!\n");
@@ -115,13 +123,14 @@ int main(int argc, char *argv[])
 }
 
 //подсчет частоты попадания файла
-void calculate_TFi(long long N[MAX_FILE],long long check_point[MAX_WORDS][MAX_FILE],double TFi[MAX_WORDS][MAX_FILE],int argc,double res_TFi[MAX_WORDS], int num_word){
+void calculate_TFi(long long N[MAX_FILE], long long check_point[MAX_WORDS][MAX_FILE], double TFi[MAX_WORDS][MAX_FILE], int argc, double *res_TFi, int num_word){
     argc -= 1;
     for(int i = 0; i < num_word; i++){
         for(int j = 0; j < argc;j++){
-            TFi[i][j] = check_point[i][j]/N[j];
+            TFi[i][j] = (double)check_point[i][j]/N[j];
         }
-        res_TFi[i] = TFi[i][0]/summ(TFi[i],argc);
+        double sum = summ(TFi[i],argc);
+        res_TFi[i] = TFi[i][0]/sum;
     }
 }
 
@@ -129,43 +138,41 @@ void calculate_TFi(long long N[MAX_FILE],long long check_point[MAX_WORDS][MAX_FI
 double summ(double TFi[MAX_FILE],int argc){
     double sum = 0;
     for(int i = 0; i < argc; i++){
-        sum += powl(TFi[i],2);
+        sum += (double)pow(TFi[i],2);
     }
     return sum;
 }
 
 //проверка слова на совпадение в матрице
-int check_in_matrix( char words[MAX_WORDS][32], char word[32], long long check_point[MAX_WORDS][MAX_FILE], int N_file){
-    char_to_lowercase(word);
-    for(int i = 0; words[i] != '\0';i++){
+int check_in_matrix( char words[MAX_WORDS][32], char *word, long long check_point[MAX_WORDS][MAX_FILE], int N_file){
 
-        if(memcpy(words[i],word,32)){
-
+    for(int i = 0; words[i][0]!='\0';i++){
+        if(strcmp(words[i],word) == 0){
             check_point[i][N_file] += 1;
             return 1;
         }
-        else
-            return 0;
     }
     return 0;
 }
 //вытаскиваем слово из потока чтения файла
-int get_words_from_collection(FILE* open_file,char word[], long long N){
+int get_words_from_collection(FILE* open_file, char *word, long long *N){
 
-    char c = fgetc(open_file);
+    int c = fgetc(open_file);
     int i = 0;
-    for( ;!isspace(c) && !ispunct(c); i++, c = fgetc(open_file))
+    for( ;!isspace(c) && !ispunct(c) && (c != EOF); i++, c = fgetc(open_file))
         word[i] = c;
 
     word[i] = '\0';
 
     if(word[0] != '\0'){
-        N += 1;
+        *N += 1;
         char_to_lowercase(word);
+//        printf("get_words_from_collection_word = %s\n",word);
+        return 1;
+
     }
     else
         return 0;
-    return 1;
 }
 
 //приведение к нижнему регистру
@@ -214,4 +221,12 @@ int close_file(FILE* file){
         return EXIT_FAILURE;
         }
     return close_file;
+}
+
+void print_matrix(long long N[][MAX_FILE]){
+    for(int i = 0; i < 15;i++){
+        for(int j = 0;j<MAX_FILE;j++){
+            printf("N[%d][%d] = %lli\n",i,j,N[i][j]);
+        }
+    }
 }
