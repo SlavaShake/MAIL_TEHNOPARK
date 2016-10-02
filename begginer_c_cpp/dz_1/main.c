@@ -114,11 +114,10 @@ int main(int argc, char *argv[])
 
     for(int i = 0; i < num_word; i++){
 
-//        fprintf(write_file,"RED%15s = BLUE%15.9f \n\n",words[i],res_TFi[i]);
-        printf("RED%15s = BLUE%15.9f \n\n",words[i],res_TFi[i]);
+        fprintf(write_file,"%15s = %15.9f \n\n",words[i],res_TFi[i]);
+        printf("%15s = %15.9f \n\n",words[i],res_TFi[i]);
     }
     close_file(write_file);
-    printf("Hello World!\n");
     return 0;
 }
 
